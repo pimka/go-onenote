@@ -1,0 +1,11 @@
+version: '3.3'
+services:
+  psql:
+    container_name: db
+    image: postgres:13-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: puser
+      POSTGRES_PASSWORD: puser123
+      POSTGRES_DB: postgres
