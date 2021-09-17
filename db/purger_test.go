@@ -8,7 +8,7 @@ import (
 )
 
 func TestPurger(t *testing.T) {
-	nh := NewMockDB()
+	nh := db.NewMockDB()
 	p := db.NewPurger(nh, time.Second, 5)
 
 	p.Purge(context.Background())

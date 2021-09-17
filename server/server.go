@@ -29,13 +29,13 @@ type Server struct {
 
 func (s *Server) routes() {
 	noteRouter := s.Router.PathPrefix("/note/").Subrouter()
-	noteRouter.HandleFunc("/", s.listNotes()).Methods("GET")
-	noteRouter.HandleFunc("/", s.addNote()).Methods("POST")
-	noteRouter.HandleFunc("/{uid}", s.getNote()).Methods("GET")
-	noteRouter.HandleFunc("/{uid}", s.updateNote()).Methods("PATCH")
-	noteRouter.HandleFunc("/{uid}", s.deleteNote()).Methods("DELETE")
-	noteRouter.HandleFunc("/api/", s.popNote()).Methods("DELETE")
-	noteRouter.HandleFunc("/api/", s.peekNote()).Methods("GET")
+	noteRouter.HandleFunc("/", s.ListNotes()).Methods("GET")
+	noteRouter.HandleFunc("/", s.AddNote()).Methods("POST")
+	noteRouter.HandleFunc("/{uid}", s.GetNote()).Methods("GET")
+	noteRouter.HandleFunc("/{uid}", s.UpdateNote()).Methods("PATCH")
+	noteRouter.HandleFunc("/{uid}", s.DeleteNote()).Methods("DELETE")
+	noteRouter.HandleFunc("/api/", s.PopNote()).Methods("DELETE")
+	noteRouter.HandleFunc("/api/", s.PeekNote()).Methods("GET")
 }
 
 func setContentType(next http.Handler) http.Handler {

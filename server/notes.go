@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func (s *Server) listNotes() http.HandlerFunc {
+func (s *Server) ListNotes() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		ctx := request.Context()
 		notes, err := s.NH.List(ctx)
@@ -27,7 +27,7 @@ func (s *Server) listNotes() http.HandlerFunc {
 	}
 }
 
-func (s *Server) addNote() http.HandlerFunc {
+func (s *Server) AddNote() http.HandlerFunc {
 	type requestBody struct {
 		Text       string `json:"text"`
 		Expiration int    `json:"expiration"`
@@ -67,7 +67,7 @@ func (s *Server) addNote() http.HandlerFunc {
 	}
 }
 
-func (s *Server) updateNote() http.HandlerFunc {
+func (s *Server) UpdateNote() http.HandlerFunc {
 	type requestBody struct {
 		Text string `json:"text"`
 	}
@@ -109,7 +109,7 @@ func (s *Server) updateNote() http.HandlerFunc {
 	}
 }
 
-func (s *Server) getNote() http.HandlerFunc {
+func (s *Server) GetNote() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		vars := mux.Vars(request)
 		uidStr := vars["uid"]
@@ -135,7 +135,7 @@ func (s *Server) getNote() http.HandlerFunc {
 	}
 }
 
-func (s *Server) deleteNote() http.HandlerFunc {
+func (s *Server) DeleteNote() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		vars := mux.Vars(request)
 		uidStr := vars["uid"]
@@ -155,7 +155,7 @@ func (s *Server) deleteNote() http.HandlerFunc {
 	}
 }
 
-func (s *Server) peekNote() http.HandlerFunc {
+func (s *Server) PeekNote() http.HandlerFunc {
 	type responseBody struct {
 		Exist bool `json:"exist"`
 	}
@@ -200,11 +200,12 @@ func (s *Server) peekNote() http.HandlerFunc {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		writer.WriteHeader(http.StatusOK)
 		writer.Write(jsonResp)
 	}
 }
 
-func (s *Server) popNote() http.HandlerFunc {
+func (s *Server) PopNote() http.HandlerFunc {
 	type requestBody struct {
 		ID uuid.UUID `json:"id"`
 	}
