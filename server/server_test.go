@@ -15,9 +15,9 @@ import (
 
 func createServer(mdb *db.MockDB) *server.Server {
 	s := &server.Server{
-		Purger: db.NewPurger(mdb, time.Minute, 5),
-		Router: nil,
-		NH:     mdb,
+		DBPurger: db.NewPurger(mdb, time.Minute, 5),
+		Router:   nil,
+		NH:       mdb,
 	}
 	return s
 }

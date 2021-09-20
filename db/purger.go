@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Purger struct {
+type NotePurger struct {
 	nh          NoteHandler
 	off         chan struct{}
 	done        chan struct{}
@@ -13,8 +13,8 @@ type Purger struct {
 	maxErrCount int
 }
 
-func NewPurger(nh NoteHandler, timeout time.Duration, maxErrCount int) *Purger {
-	return &Purger{
+func NewPurger(nh NoteHandler, timeout time.Duration, maxErrCount int) *NotePurger {
+	return &NotePurger{
 		nh:          nh,
 		off:         make(chan struct{}, 1),
 		done:        make(chan struct{}, 1),
@@ -23,7 +23,7 @@ func NewPurger(nh NoteHandler, timeout time.Duration, maxErrCount int) *Purger {
 	}
 }
 
-func (p *Purger) Purge(ctx context.Context) {
+func (p *NotePurger) Purge(ctx context.Context) {
 	t := time.NewTicker(p.timeout)
 	go func() {
 		defer func() {
@@ -51,10 +51,10 @@ func (p *Purger) Purge(ctx context.Context) {
 	}()
 }
 
-func (p *Purger) Stop() chan<- struct{} {
+func (p *NotePurger) Stop() chan<- struct{} {
 	return p.off
 }
 
-func (p *Purger) Done() <-chan struct{} {
+func (p *NotePurger) Done() <-chan struct{} {
 	return p.done
 }

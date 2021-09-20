@@ -22,20 +22,21 @@ type Config struct {
 }
 
 type Server struct {
-	Router *mux.Router
-	NH     db.NoteHandler
-	Purger *db.Purger
+	Router   *mux.Router
+	NH       db.NoteHandler
+	DBPurger *db.NotePurger
+	VPurger  *VisitorsPurger
 }
 
-func (s *Server) routes() {
+func (s *Server) routes(vl *VLimiter) {
 	noteRouter := s.Router.PathPrefix("/note/").Subrouter()
-	noteRouter.HandleFunc("/", s.ListNotes()).Methods("GET")
-	noteRouter.HandleFunc("/", s.AddNote()).Methods("POST")
-	noteRouter.HandleFunc("/{uid}", s.GetNote()).Methods("GET")
-	noteRouter.HandleFunc("/{uid}", s.UpdateNote()).Methods("PATCH")
-	noteRouter.HandleFunc("/{uid}", s.DeleteNote()).Methods("DELETE")
-	noteRouter.HandleFunc("/api/", s.PopNote()).Methods("DELETE")
-	noteRouter.HandleFunc("/api/", s.PeekNote()).Methods("GET")
+	noteRouter.Handle("/", Limiter(s.ListNotes(), vl)).Methods("GET")
+	noteRouter.Handle("/", Limiter(s.AddNote(), vl)).Methods("POST")
+	noteRouter.Handle("/{uid}", Limiter(SimpleAuth(s.GetNote()), vl)).Methods("GET")
+	noteRouter.Handle("/{uid}", Limiter(s.UpdateNote(), vl)).Methods("PATCH")
+	noteRouter.Handle("/{uid}", Limiter(SimpleAuth(s.DeleteNote()), vl)).Methods("DELETE")
+	noteRouter.Handle("/api/", Limiter(s.PopNote(), vl)).Methods("DELETE")
+	noteRouter.Handle("/api/", Limiter(s.PeekNote(), vl)).Methods("GET")
 }
 
 func setContentType(next http.Handler) http.Handler {
@@ -54,7 +55,7 @@ func (s *Server) Start(c Config) {
 	})
 
 	s.Router.Use(setContentType)
-	s.routes()
+	s.routes(&s.VPurger.limiter)
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", c.Port),
 		WriteTimeout: time.Second * 15,
@@ -69,7 +70,8 @@ func (s *Server) Start(c Config) {
 		}
 	}()
 
-	s.Purger.Purge(context.Background())
+	s.DBPurger.Purge(context.Background())
+	s.VPurger.Purge()
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
@@ -84,6 +86,8 @@ func (s *Server) Start(c Config) {
 }
 
 func (s *Server) Stop() {
-	s.Purger.Stop() <- struct{}{}
-	<-s.Purger.Done()
+	s.DBPurger.Stop() <- struct{}{}
+	<-s.DBPurger.Done()
+	s.VPurger.Stop() <- struct{}{}
+	<-s.VPurger.Done()
 }

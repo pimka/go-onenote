@@ -36,7 +36,7 @@ func (ndb *NoteDB) Get(ctx context.Context, uid uuid.UUID) (*Note, error) {
 	}
 
 	n := &Note{}
-	if err = ndb.conn.QueryRow(ctx, sql, args...).Scan(&n.ID, &n.Text, &n.Created); err != nil {
+	if err = ndb.conn.QueryRow(ctx, sql, args...).Scan(&n.ID, &n.Text, &n.Created, &n.Expiration); err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
 		}
@@ -61,7 +61,7 @@ func (ndb *NoteDB) List(ctx context.Context) ([]*Note, error) {
 
 	for rows.Next() {
 		n := &Note{}
-		if err = rows.Scan(&n.ID, &n.Text, &n.Created); err != nil {
+		if err = rows.Scan(&n.ID, &n.Text, &n.Created, &n.Expiration); err != nil {
 			return nil, err
 		}
 		notes = append(notes, n)

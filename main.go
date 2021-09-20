@@ -23,11 +23,13 @@ func main() {
 	}
 
 	nh := db.NewNoteDB(database.Conn)
+	vl := server.VLimiter{Visitors: make(map[string]*server.Visitor)}
 
 	service := &server.Server{
-		Purger: db.NewPurger(nh, time.Minute, 5),
-		Router: mux.NewRouter(),
-		NH:     nh,
+		VPurger:  server.NewPurger(vl, time.Minute, 5),
+		DBPurger: db.NewPurger(nh, time.Minute, 5),
+		Router:   mux.NewRouter(),
+		NH:       nh,
 	}
 	service.Start(conf)
 	defer service.Stop()
